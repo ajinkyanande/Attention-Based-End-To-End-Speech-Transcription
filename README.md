@@ -1,50 +1,74 @@
-To run the entire pipeline: python hw4p2.py
+# Attention-Based End-To-End Speech Transcription
 
-Experimentation:
+This project implements an end-to-end speech transcription system using an attention-based model. The system is designed to convert spoken language into written text.
 
-    01) Epochs : 50 : total number of epochs trained with varying teacher forcing rate
+## Table of Contents
+- [Setup](#setup)
+- [Usage](#usage)
+- [Model Architecture](#model-architecture)
+- [Experimentation](#experimentation)
+- [Results](#results)
+- [References](#references)
 
-    02) Batch Size : 128 : maximum that fits the hardware
+## Setup
 
-    03) Weight Decay : 5e-6 : standard LAS value
+To set up the project, follow these steps:
 
-    04) Learning Rate Scheduler : cosine annealing : starts with 1e-3 and is decayed till is 1e-5
+1. **Clone the repository:**
+    ```bash
+    git clone https://github.com/ajinkyanande/Attention-Based-End-To-End-Speech-Transcription.git
+    cd Attention-Based-End-To-End-Speech-Transcription
+    ```
 
-    05) Teacher Forcing Rate Scheduler : teacher forcing rate was manually set to values [1.0, 0.75, 0.6, 0.3, 0.1] according th model convergence
+2. **Run the setup script:**
+    ```bash
+    sh setup.sh
+    ```
 
-    06) Network : LAS(
-                     (encoder): Listener(
-                         (base_lstm): LSTM(15, 512, batch_first=True, bidirectional=True)
-                         (ld1): LockedDropout(p=0.4)
-                         (pBLSTM1): pBLSTM(
-                         (blstm): LSTM(2048, 512, batch_first=True, bidirectional=True)
-                         )
-                         (ld2): LockedDropout(p=0.3)
-                         (pBLSTM2): pBLSTM(
-                         (blstm): LSTM(2048, 512, batch_first=True, bidirectional=True)
-                         )
-                         (ld3): LockedDropout(p=0.3)
-                         (pBLSTM3): pBLSTM(
-                         (blstm): LSTM(2048, 512, batch_first=True, bidirectional=True)
-                         )
-                     )
-                     (decoder): Speller(
-                         (attention): Attention(
-                         (key_projection): Linear(in_features=1024, out_features=256, bias=True)
-                         (value_projection): Linear(in_features=1024, out_features=256, bias=True)
-                         (query_projection): Linear(in_features=512, out_features=256, bias=True)
-                         (context_projection): Linear(in_features=256, out_features=256, bias=True)
-                         (softmax): Softmax(dim=1)
-                         )
-                         (embedding): Embedding(30, 512, padding_idx=29)
-                         (lstm_cells): Sequential(
-                         (0): LSTMCell(768, 512)
-                         (1): LSTMCell(512, 512)
-                         )
-                         (char_prob): Linear(in_features=768, out_features=30, bias=True)
-                     )
-                     )
+3. **Install the required Python packages:**
+    ```bash
+    pip3 install -r requirements.txt
+    ```
 
-    07) Network Weights Initialization : LSTM weights were initialized with uniform distribution between -0.1 and 0.1 as given in LAS paper
+## Usage
 
-    08) WandB Runs : wandb project is made public and can be found here : https://wandb.ai/ajinkyanande111/hw4p2
+To run the entire pipeline, use the following command:
+```bash
+python main.py
+```
+
+## Model Architecture
+
+The model architecture is based on the Listen, Attend and Spell (LAS) framework, which consists of three main components:
+
+1. **Listener (Encoder):**
+    - A stack of pyramidal Bidirectional LSTM (pBLSTM) layers that process the input speech features and reduce the sequence length.
+
+2. **Attention Mechanism:**
+    - Computes a context vector as a weighted sum of the encoder outputs, where the weights are determined by the similarity between the decoder state and the encoder outputs.
+
+3. **Speller (Decoder):**
+    - A stack of LSTM cells that generate the output sequence one character at a time, conditioned on the context vector from the attention mechanism.
+
+## Experimentation
+
+The following hyperparameters and configurations were used for experimentation:
+
+1. **Epochs:** 50
+2. **Batch Size:** 128
+3. **Weight Decay:** 5e-6
+4. **Learning Rate Scheduler:** Cosine annealing, starting at 1e-3 and decaying to 1e-5
+5. **Teacher Forcing Rate Scheduler:** Manually set to values [1.0, 0.75, 0.6, 0.3, 0.1] based on model convergence
+6. **Network Architecture:**
+    - **Encoder:** Listener with pBLSTM layers and LockedDropout
+    - **Decoder:** Speller with attention mechanism
+
+## Results
+
+The model was trained and evaluated on the provided dataset. The best model checkpoint is saved and can be used for inference.
+
+## References
+
+- [Listen, Attend and Spell (LAS) Paper](https://arxiv.org/abs/1508.01211)
+- [PyTorch Documentation](https://pytorch.org/docs/stable/index.html)
+- [WandB Documentation](https://docs.wandb.ai/)
